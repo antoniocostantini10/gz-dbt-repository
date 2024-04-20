@@ -145,5 +145,19 @@ models:
             - logcost
             - ship_cost
             - total_quantity
-
-    
+    lineage:
+      - source: int_orders_operational
+        type: aggregation
+        aggregation_columns:
+          - date_date
+        columns_mapping:
+          nb_transactions: COUNT(DISTINCT orders_id)
+          revenue: SUM(revenue)
+          average_basket: AVG(revenue)
+          margin: SUM(margin)
+          operational_margin: SUM(operational_margin)
+          purchase_cost: SUM(purchase_cost)
+          shipping_fee: SUM(shipping_fee)
+          logcost: SUM(logcost)
+          ship_cost: SUM(ship_cost)
+          total_quantity: SUM(quantity)
