@@ -147,24 +147,32 @@ models:
             - total_quantity
 
     # Lineage Definition
-    sources:
-      - name: gz_raw_data.raw_gz_sales
-        columns:
-          - name: date_date
-            description: Date of the transactions
-          - name: orders_id
-            description: Order identification
-          - name: revenue
-            description: Total revenue per order
-          - name: quantity
-            description: Total quantity per order
-          - name: purchase_cost
-            description: Total purchase cost per order
-          - name: margin
-            description: Margin calculated from revenue and purchase cost
-          - name: shipping_fee
-            description: Shipping fee for the order
-          - name: logcost
-            description: Logistic cost for the order
-          - name: ship_cost
-            description: Shipping cost for the business
+    meta:
+      sources:
+        - name: int_orders_operational
+          description: Intermediate operational data for finance reporting
+          columns:
+            - name: date_date
+              description: Date of the transactions
+            - name: nb_transactions
+              description: Number of transactions (orders)
+            - name: revenue
+              description: Total revenue for the date period
+            - name: margin
+              description: Total margin for the date period
+            - name: operational_margin
+              description: Operational margin for the date period
+            - name: purchase_cost
+              description: Total purchase cost for the date period
+            - name: shipping_fee
+              description: Total shipping fees for the date period
+            - name: logcost
+              description: Total logistic costs for the date period
+            - name: ship_cost
+              description: Total shipping costs for the date period
+            - name: total_quantity
+              description: Total quantity of products sold for the date period
+            - name: orders_id
+              description: Order identification
+            - name: quantity
+              description: Total quantity per order
