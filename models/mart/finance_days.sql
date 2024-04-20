@@ -1,4 +1,6 @@
-{{config (materilized='table')}}
+{{config(
+    materialized='table'
+)}}
 
 SELECT
     date_date,
@@ -16,3 +18,4 @@ SELECT
 FROM `proud-archery-418309`.`dbt_acostantini`.`int_orders_operational`
 GROUP BY date_date
 ORDER BY date_date DESC
+
