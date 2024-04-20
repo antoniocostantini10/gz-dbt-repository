@@ -166,6 +166,7 @@ models:
 
   - name: finance_days
     description: Aggregate metrics by date for finance reporting
+    materialized: table
     columns:
       - name: date_date
         description: Date of the transactions
