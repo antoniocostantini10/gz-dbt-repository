@@ -1,55 +1,210 @@
 version: 2
 
 sources:
-   - name: gz_raw_data
-     schema: gz_raw_data
-     description: greenweez raw data source 
-     tables:
-        - name: raw_gz_sales
-          freshness:
-            warn_after: 
-              count: 90 
-              period: day
-          loaded_at_field: "CAST(date_date AS TIMESTAMP)"
-          identifier: raw_gz_sales
-          description: sales of greenweez / we have one row per products_id found in each orders_id.
-          columns:
-            - name: raw_gz_date_date
-              description: the date of purchase
-            - name: orders_id
-              description: the order identifaction
-            - name: products_id
-              description: the product type
-            - name: revenue
-              description: the total revenue per order and product
-            - name: quantity
-              description: number of product
-          tests: 
-            - unique:
-               column_name: "(orders_id || '_' || pdt_id)"
-        - name: raw_gz_product
-          identifier: raw_gz_product
-          description: product type and price
-          columns: 
-            - name: products_id
-              description: product model identification, PRIMARY KEY
-              tests:
-                 - unique
-                 - not_null
-            - name: purchase_price
-              description: price of the product
-        - name: raw_gz_ship
-          identifier: raw_gz_ship
-          description: ship costs, log costs, shipping fee
-          columns:
-            - name: orders_id
-              description: identificatin of the orders, PRIMARY KEY
-              tests: 
-                - unique
-                - not_null
-            - name: shipping_fee
-              description: fee for the shipping
-            - name: logcost
-              description: cost of logistic
-            - name: ship_cost
-              description: cost of shipping for the business
+  - name: gz_raw_data
+    schema: gz_raw_data
+    description: Greenweez raw data source
+    tables:
+      - name: raw_gz_sales
+        identifier: raw_gz_sales
+        description: Sales of Greenweez; one row per products_id found in each orders_id
+        columns:
+          - name: raw_gz_date_date
+            description: The date of purchase
+          - name: orders_id
+            description: The order identification
+          - name: products_id
+            description: The product type
+          - name: revenue
+            description: The total revenue per order and product
+          - name: quantity
+            description: Number of products
+        tests:
+          - unique:
+              column_name: "(orders_id || '_' || products_id)"
+          - not_null:
+              column_name:
+                - orders_id
+                - products_id
+
+      - name: raw_gz_product
+        identifier: raw_gz_product
+        description: Product type and price
+        columns:
+          - name: products_id
+            description: Product model identification (PRIMARY KEY)
+            tests:
+              - unique
+              - not_null
+          - name: purchase_price
+            description: Price of the product
+            tests:
+              - not_null
+
+      - name: raw_gz_ship
+        identifier: raw_gz_ship
+        description: Shipping costs, log costs, shipping fee
+        columns:
+          - name: orders_id
+            description: Identification of the orders (PRIMARY KEY)
+            tests:
+              - unique
+              - not_null
+          - name: shipping_fee
+            description: Fee for shipping
+          - name: logcost
+            description: Cost of logistics
+          - name: ship_cost
+            description: Cost of shipping for the business
+            tests:
+              - not_null
+
+models:
+  - name: int_sales_margin
+    description: margin calcultation per order line / product sale
+    columns:
+      - name: margin
+        description: Margin = Revenue - Purchase_cost
+      - name: Purchase_cost
+        description: Purchase_cost = Quantity * Purchase_price 
+      - name: purchase_price
+        description: cost of products
+      - name: quantity
+        description: total nb of products
+      - name: revenue
+        description: sum of revenue per order 
+      - name: orders_id 
+        description: identification for the orders
+      - name: date_date
+        description: date of purchase
+      - name: products_id
+        description: identification number of the product
+    tests:
+      - unique:
+          column_name:
+            - products_id
+            - date_date
+      - not_null:
+          column_name:
+            - products_id
+            - date_date
+            - orders_id
+            - revenue
+            - quantity
+            - purchase_price
+            - purchase_cost
+            - margin
+
+  - name: int_orders_margin
+    description: Intermediate table for calculating margin
+    columns:
+      - name: orders_id
+        description: Order identification
+      - name: date_date
+        description: Date of the order
+      - name: revenue
+        description: Total revenue per order
+      - name: quantity
+        description: Total quantity per order
+      - name: purchase_cost
+        description: Total purchase cost per order
+      - name: margin
+        description: Margin calculated from revenue and purchase cost
+    tests:
+      - unique:
+          column_name:
+            - orders_id
+            - date_date
+      - not_null:
+          column_name:
+            - orders_id
+            - date_date
+            - revenue
+            - quantity
+            - purchase_cost
+            - margin
+
+  - name: int_orders_operational
+    description: Intermediate table for calculating operational metrics
+    columns:
+      - name: orders_id
+        description: Order identification
+      - name: date_date
+        description: Date of the order
+      - name: operational_margin
+        description: Operational margin calculated from revenue, shipping, and logistic costs
+      - name: quantity
+        description: Total quantity per order
+      - name: revenue
+        description: Total revenue per order
+      - name: purchase_cost
+        description: Total purchase cost per order
+      - name: margin
+        description: Margin calculated from revenue and purchase cost
+      - name: shipping_fee
+        description: Shipping fee for the order
+      - name: logcost
+        description: Logistic cost for the order
+      - name: ship_cost
+        description: Shipping cost for the business
+    tests:
+      - unique:
+          column_name:
+            - orders_id
+      - not_null:
+          column_name:
+            - orders_id
+            - date_date
+            - operational_margin
+            - quantity
+            - revenue
+            - purchase_cost
+            - margin
+            - shipping_fee
+            - logcost
+            - ship_cost
+
+  - name: finance_days
+    description: Aggregate metrics by date for finance reporting
+    columns:
+      - name: date_date
+        description: Date of the transactions
+      - name: nb_transactions
+        description: Number of transactions (orders)
+      - name: revenue
+        description: Total revenue for the date period
+      - name: average_basket
+        description: Average revenue per transaction
+      - name: average_basket_bis
+        description: Alternative average revenue calculation
+      - name: margin
+        description: Total margin for the date period
+      - name: operational_margin
+        description: Operational margin for the date period
+      - name: purchase_cost
+        description: Total purchase cost for the date period
+      - name: shipping_fee
+        description: Total shipping fees for the date period
+      - name: logcost
+        description: Total logistic costs for the date period
+      - name: ship_cost
+        description: Total shipping costs for the date period
+      - name: total_quantity
+        description: Total quantity of products sold for the date period
+    tests:
+      - unique:
+          column_name: date_date
+      - not_null:
+          column_name:
+            - date_date
+            - nb_transactions
+            - revenue
+            - average_basket
+            - average_basket_bis
+            - margin
+            - operational_margin
+            - purchase_cost
+            - shipping_fee
+            - logcost
+            - ship_cost
+            - total_quantity
