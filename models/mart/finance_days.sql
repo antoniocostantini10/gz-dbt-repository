@@ -1,4 +1,4 @@
-{{config( materilized='table')}}
+{{config (materilized='table')}}
 
 SELECT
     date_date,

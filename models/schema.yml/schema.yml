@@ -209,3 +209,11 @@ models:
             - logcost
             - ship_cost
             - total_quantity
+    models: 
+      dbt_acostantini:
+        staging:
+          +materialized: view
+        intermidiate:
+          +materialized: view
+        mart: 
+          +materialized: table
