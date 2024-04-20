@@ -163,7 +163,7 @@ models:
             - shipping_fee
             - logcost
             - ship_cost
-
+mart :
   - name: finance_days
     description: Aggregate metrics by date for finance reporting
     materialized: table
